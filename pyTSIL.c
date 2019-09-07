@@ -112,7 +112,7 @@ static PyMethodDef funcs[] = {
 static struct PyModuleDef pyTSIL = {
     PyModuleDef_HEAD_INIT,
     "pyTSIL",
-    "TSIL interface",
+    "Interface to TSIL (hep-ph/0501132)",
     -1,
     funcs
 };
