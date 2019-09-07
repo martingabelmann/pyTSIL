@@ -20,13 +20,16 @@ static PyObject* TSIL(PyObject* self, PyObject* args)
 #include "tsil_names.h"
     int i,j,k;
     double x, y, z, u, v, s, qq;
+    clock_t t0, t1,t2;
     
+    t0 = clock();
     if(!PyArg_ParseTuple(args, "ddddddd", &x, &y, &z, &u, &v, &s, &qq))
         return NULL;
 
     TSIL_DATA result;
     TSIL_SetParameters (&result, x, y, z, u, v, qq);
     TSIL_Evaluate (&result, s);
+    t1 = clock();
 
     //TSIL_PrintInfo ();
     //TSIL_PrintVersion ();
@@ -88,6 +91,13 @@ static PyObject* TSIL(PyObject* self, PyObject* args)
     		    addvalue(mydict, ttname[j][k], result.T[j].bold[k]);
     	}
     }
+    t2 = clock();
+
+    PyObject *calctime = PyFloat_FromDouble(difftime(t1, t0)/CLOCKS_PER_SEC);
+    PyObject *runtime = PyFloat_FromDouble(difftime(t2, t1)/CLOCKS_PER_SEC);
+
+    PyDict_SetItemString(mydict, "CalcTime", calctime);
+    PyDict_SetItemString(mydict, "RunTime", runtime);
 
     return mydict;
 }
