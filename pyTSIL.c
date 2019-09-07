@@ -31,11 +31,19 @@ static PyObject* TSIL(PyObject* self, PyObject* args)
     TSIL_Evaluate (&result, s);
     t1 = clock();
 
+    // TODO add verbose flag
     //TSIL_PrintInfo ();
     //TSIL_PrintVersion ();
-    TSIL_PrintStatus (&result);
+    //TSIL_PrintStatus (&result);
 
     PyObject *mydict = PyDict_New();
+    PyDict_SetItemString(mydict, "x", PyFloat_FromDouble(x));
+    PyDict_SetItemString(mydict, "y", PyFloat_FromDouble(y));
+    PyDict_SetItemString(mydict, "z", PyFloat_FromDouble(z));
+    PyDict_SetItemString(mydict, "u", PyFloat_FromDouble(u));
+    PyDict_SetItemString(mydict, "v", PyFloat_FromDouble(v));
+    PyDict_SetItemString(mydict, "s", PyFloat_FromDouble(s));
+    PyDict_SetItemString(mydict, "qq", PyFloat_FromDouble(qq));
     addvalue(mydict, "Mxyzuv", TSIL_GetFunction(&result, "M"));
     for (i=0; i<6; i++) {
         for (j=0; j<6; j++) {

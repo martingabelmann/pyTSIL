@@ -6,7 +6,7 @@
 ## Install
 
  * download and build [TSIL](https://www.niu.edu/spmartin/TSIL/)
-  * edit the Makefile to build with `-fPIC`
+   * edit the Makefile to build with `-fPIC`
  * build: `TSILDIR=/home/user/tsil python3 setup.py build && sudo -E python3 setup.py  install`
    * `TSILDIR` should be the location where TSIL has been installed
 ## Usage
