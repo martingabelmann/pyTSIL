@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <tsil.h>
+#include <tsil_funcs.h>
 #include <Python.h>
 
 // TODO catch errors, build exceptions
@@ -13,6 +14,92 @@ void addvalue(PyObject *dict, const char *key, TSIL_COMPLEX val)
     PyDict_SetItemString(dict, key, z);
     return; 
 }
+
+TSIL_COMPLEX TSIL_Bepsprime (TSIL_REAL X, TSIL_REAL Y, TSIL_COMPLEX S, TSIL_REAL QQ)
+{
+    TSIL_COMPLEX t1, t2, t3, t4, dt1, dt2, dt3, dt4, s;
+    TSIL_COMPLEX log1msox,sqrtdelta,sqrtdelta2,sqrtdelta3,dsqrtdelta;
+    TSIL_REAL x, y, sqrtx, sqrty, lnbarx, lnbary;
+    x = X;
+    y = Y;
+    s = TSIL_AddIeps(S);
+    lnbarx = TSIL_CLOG(X/QQ);
+    if (TSIL_CABS(S) < TSIL_TOL) {
+        if (TSIL_FABS(Y) < TSIL_TOL) return (lnbarx-1.0L)/X;
+        lnbary = TSIL_CLOG(Y/QQ);
+        if (TSIL_FABS(X-Y)/(X+Y) < TSIL_TOL) return lnbarx/(2.0L*X);
+        return (2.0L*(-X + Y + X*lnbarx) - Y*lnbarx*lnbarx + Y*( -2.0L + lnbary)*lnbary)/(2.0L*(X-Y)*(X-Y));
+    }
+    
+
+    if (TSIL_FABS(Y) < TSIL_TOL) {
+        if (TSIL_CABS(S-X) < TSIL_TOL) return (lnbarx-2.0L)/X;
+        log1msox = TSIL_CLOG(1-s/X);
+        return (2.0L*log1msox - 2.0L*lnbarx*log1msox-log1msox*log1msox + 2.0L*TSIL_CLOG(-(X/(s-X))) + 2.0L*TSIL_Dilog(s/(s-X)))/(2.0L*s);
+    }
+    lnbary = TSIL_CLOG(Y/QQ);
+    sqrtx = TSIL_SQRT(x);
+    sqrty = TSIL_SQRT(y);
+ 
+    if (TSIL_CABS(S-TSIL_POW(sqrtx+sqrty,2))/(x+y) < TSIL_TOL) {
+        return (-8.0L*(sqrtx+sqrty)+4.0L*sqrtx*lnbarx+sqrty*lnbarx*lnbarx - sqrty*(-4.0L+lnbary)*lnbary)/(4.0L*sqrtx*TSIL_POW(sqrtx+sqrty,2));
+    }
+    if (TSIL_CABS(S-TSIL_POW(sqrtx-sqrty,2))/(x+y) < TSIL_TOL) {
+        return (-8.0L*sqrtx+8.0L*sqrty+4.0L*sqrtx*lnbarx-sqrty*lnbarx*lnbarx+sqrty*(-4.0L+lnbary)*lnbary)/(4.0L*sqrtx*TSIL_POW(sqrtx-sqrty,2));
+    }
+
+    sqrtdelta=TSIL_CSQRT(S*S - 2*S*x + x*x - 2*S*y - 2*x*y + y*y);
+    sqrtdelta2=TSIL_CSQRT(sqrtdelta*sqrtdelta);
+    sqrtdelta3=TSIL_CPOW(sqrtdelta*sqrtdelta, 3.0L/2.0L);
+    t1=(s-x+y+sqrtdelta)/(2.0L*sqrtdelta); 
+    t2=(-s-x+y+sqrtdelta)/(2.0L*sqrtdelta);
+    t3=(-s+x+y+sqrtdelta)/(2.0L*x);
+    t4=(-s+x+y-sqrtdelta)/(2.0L*x); 
+
+    dsqrtdelta=-((s-x+y)/sqrtdelta);
+    dt1=((s+sqrtdelta-x+y)*(s-sqrtdelta2-x+y))/(2.0L*sqrtdelta3);
+    dt2=(-s*s+s*(sqrtdelta-sqrtdelta2)-(sqrtdelta2+x-y)*(sqrtdelta-x+y))/(2.0L*sqrtdelta3);
+    dt3=(s*(sqrtdelta-x)-(sqrtdelta+x)*(sqrtdelta-x+y))/(2.0L*sqrtdelta*x*x);
+    dt4=(s*(sqrtdelta+x)+(sqrtdelta-x)*(sqrtdelta+x-y))/(2.0L*sqrtdelta*x*x);
+    
+    return 1.0L/4.0L*(
+            -4.0L/x + (2.0L*lnbarx)/x 
+            + (1.0L/s)*(
+                ((x-y)*(lnbarx-lnbary))/x 
+                + ((x-y)*(-4.0L+lnbarx+lnbary))/x  
+                + (lnbarx-lnbary)*(-4.0L+lnbarx+lnbary)
+                + sqrtdelta*(
+                    ((dt4*t3-dt3*t4)*(-4.0L+lnbarx+lnbary))/(t3*t4)
+                    + (4.0L*dt1*TSIL_CLOG(1-t1))/t1 
+                    - (4.0L*dt2*TSIL_CLOG(1-t2))/t2
+                    + 2.0L*(-(dt1/t1)+dt2/t2)*(TSIL_CLOG(1-t1)+TSIL_CLOG(1-t2))
+                    + 2.0L*(dt1/(-1.0L+t1)+dt2/(-1.0L+t2))*(TSIL_CLOG(t2)-TSIL_CLOG(t1))
+                    + (TSIL_CLOG(t4)-TSIL_CLOG(t3))/x
+                ) + dsqrtdelta*(
+                    2.0L*(TSIL_CLOG(1-t1)+TSIL_CLOG(1-t2))*(-TSIL_CLOG(t1)+TSIL_CLOG(t2))
+                    - 1.0L*(-4.0L+lnbarx+lnbary)*(TSIL_CLOG(t3)-TSIL_CLOG(t4))
+                    -4.0L*TSIL_Dilog(t1) +4.0L*TSIL_Dilog(t2))
+            )
+        );
+}
+
+TSIL_COMPLEX TSIL_Cfin (TSIL_REAL X, TSIL_REAL Y, TSIL_REAL Z, TSIL_COMPLEX S, TSIL_REAL QQ)
+{
+    if (TSIL_FABS(Y-Z) < TSIL_TOL) {
+        return TSIL_Bp(Z,X,S,QQ);
+    } else {
+        return (TSIL_B(Y, X, S, QQ) - TSIL_B(Z, X, S, QQ))/(Y-Z);
+    }
+}
+
+TSIL_COMPLEX TSIL_Ceps (TSIL_REAL X, TSIL_REAL Y, TSIL_REAL Z, TSIL_COMPLEX S, TSIL_REAL QQ)
+{
+    if (TSIL_FABS(Y-Z) < TSIL_TOL)
+        return TSIL_Bepsprime(Z,X,S,QQ);
+    else
+        return (TSIL_Beps(Y, X, S, QQ) - TSIL_Beps(Z, X, S, QQ))/(Y-Z);
+}
+
 
 static PyObject* TSIL(PyObject* self, PyObject* args)
 {
@@ -87,6 +174,15 @@ static PyObject* TSIL(PyObject* self, PyObject* args)
     addvalue(mydict, "Bepsxz", TSIL_Beps(x, z, s, qq));
     addvalue(mydict, "Bepsyu", TSIL_Beps(y, u, s, qq));
 
+    addvalue(mydict, "Bepsprimexy", TSIL_Bepsprime(x, y, s, qq));
+    addvalue(mydict, "Bepsprimexz", TSIL_Bepsprime(x, z, s, qq));
+    addvalue(mydict, "Bepsprimeyu", TSIL_Bepsprime(y, u, s, qq));
+
+    // C0 function
+    addvalue(mydict, "Cfinxyz", TSIL_Cfin(x, y, z, s, qq));
+    addvalue(mydict, "Cepsxyz", TSIL_Ceps(x, y, z, s, qq));
+
+
     for (k=0; k<3; k++) {
     	for (j=0; j<6; j++) {
             if(j<NUM_U_FUNCS)
@@ -112,7 +208,7 @@ static PyObject* TSIL(PyObject* self, PyObject* args)
 
 // function definitions
 static PyMethodDef funcs[] = {
-    { "TSIL", TSIL, METH_VARARGS, "returns a dict containing all one- and two-loop functions" },
+    { "TSIL", TSIL, METH_VARARGS, "TSIL(x,y,z,u,v,s,qq) returns a dict containing all one- and two-loop functions." },
     { NULL, NULL, 0, NULL }
 };
 
