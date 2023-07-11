@@ -16,7 +16,6 @@ if not path.isfile(path.join(environ['TSILDIR'],'libtsil.a')):
 setup(
         name = 'pyTSIL',
         version = '1.0',
-        modules = ['pyTSIL.loopfunctions'],
         ext_modules = [
             Extension(
                 'TSIL',
