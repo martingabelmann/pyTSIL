@@ -221,7 +221,7 @@ static struct PyModuleDef pyTSIL = {
     funcs
 };
 
-PyMODINIT_FUNC PyInit_pyTSIL(void)
+PyMODINIT_FUNC PyInit_TSIL(void)
 {
     return PyModule_Create(&pyTSIL);
 }

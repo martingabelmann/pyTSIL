@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools", "wheel", "cython"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyTSIL"
+version = "1.0"
+authors = [
+    {name = "Martin Gabelmann",  email = "martin.gabelmann@desy.de"}
+]
